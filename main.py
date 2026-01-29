@@ -5,10 +5,11 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
 
-from src.utils.data_loader import load_current_countries_data, load_historical_year_data
+from src.utils.data_loader import load_current_countries_data, load_current_continents_data, load_historical_year_data, export_continent_csv
 
 # Charge une seule fois au démarrage (via cache TTL)
 df_countries = load_current_countries_data()
+df_continents = load_current_continents_data()
 
 app = dash.Dash(__name__)
 app.title = "COVID-19 Dashboard mondial"
@@ -64,6 +65,10 @@ app.layout = html.Div([
         html.Div([
             html.H2("Top 20 des pays les plus touchés", style={'textAlign': 'center'}),
             dcc.Graph(id='top-countries-bar', style={'height': '500px'})
+        ]),
+        html.Div([
+            html.H2("Nombre de cas par continent", style={'textAlign': 'center'}),
+            dcc.Graph(id='continent-bar', style={'height': '500px'})
         ])
     ], style={'padding': '20px', 'fontFamily': 'Arial, sans-serif', 'maxWidth': '1400px', 'margin': 'auto'})
 ])
@@ -72,6 +77,11 @@ def _get_df_for_year(selected_year):
     if selected_year == 'all':
         return df_countries
     return load_historical_year_data(int(selected_year))
+
+def _get_df_for_year_per_continent(selected_year):
+    if selected_year == 'all':
+        return df_continents
+    return export_continent_csv(int(selected_year))
 
 @app.callback(
     Output('global-stats', 'children'),
@@ -189,6 +199,54 @@ def update_bar_chart(selected_year, selected_metric):
         paper_bgcolor='white'
     )
     return fig
+
+#Histogramme par continent
+@app.callback(
+    Output('continent-bar', 'figure'),
+    [Input('year-dropdown', 'value'),
+     Input('metric-dropdown', 'value')]
+)
+def update_bar_chart_continent(selected_year, selected_metric):
+    df = _get_df_for_year_per_continent(selected_year)
+    if df.empty:
+        return go.Figure()
+
+    metric_info = {
+        'cases': {'title': 'Cas totaux', 'color': '#3498db'},
+        'deaths': {'title': 'Décès totaux', 'color': '#e74c3c'},
+        'recovered': {'title': 'Rétablis', 'color': '#2ecc71'},
+        'active': {'title': 'Cas actifs', 'color': '#f39c12'}
+    }
+    info = metric_info.get(selected_metric, metric_info['cases'])
+    # Création de la figure
+    fig = go.Figure(
+        data = [
+            go.Bar(
+                x=df['continent'],
+                y=df[selected_metric],
+                marker=dict(color=df[selected_metric],
+                            colorscale=[[0, '#f0f0f0'], [1, info['color']]],
+                            line=dict(color=info['color'], width=1)),
+                text=df[selected_metric].apply(lambda x: f"{x:,}"),
+                textposition='outside'
+            )
+        ]
+    )
+    year_text = f" - {selected_year}" if selected_year != 'all' else " - Actuelles"
+    # Mise en forme
+    fig.update_layout(
+        title={'text': f"{info['title']}{year_text}", 'x': 0.5, 'xanchor': 'center', 'font': {'size': 20}},
+        xaxis_title="Continent",
+        yaxis_title=info['title'],
+        showlegend=False,
+        height=500,
+        margin=dict(l=150, r=80, t=60, b=50),
+        plot_bgcolor='white',
+        xaxis=dict(gridcolor='#e0e0e0'),
+        paper_bgcolor='white'
+    )
+    return fig
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8050, use_reloader=False)

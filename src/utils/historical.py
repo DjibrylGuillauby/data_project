@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+import os
 
 def fetch_historical_countries(year):
     """Récupère les données historiques par pays pour une année donnée"""
@@ -95,3 +96,37 @@ def fetch_historical_countries(year):
     except Exception as e:
         print(f"Erreur données historiques: {e}")
         return pd.DataFrame()
+
+def fetch_historical_continents(year):
+    hist_path = os.path.join("data", "cleaned", f"historical_{year}.csv")
+
+    if os.path.exists(hist_path):
+        df_countries = pd.read_csv(hist_path)
+    else:
+        df_countries = fetch_historical_countries(year)
+        df_countries.to_csv(hist_path, index=False, encoding="utf-8")
+
+    if df_countries.empty:
+        return pd.DataFrame()
+
+    mapping_path = os.path.join("data", "cleaned", "country_continent.csv")
+    df_mapping = pd.read_csv(mapping_path)
+
+    df_countries = df_countries.merge(
+        df_mapping,
+        on="country",
+        how="left"
+    )
+
+    df_countries = df_countries[df_countries["continent"].notna()]
+
+    df_continent = (
+        df_countries
+        .groupby("continent")[["cases", "deaths", "recovered", "active"]]
+        .sum()
+        .reset_index()
+    )
+
+    df_continent["year"] = year
+    return df_continent
+
