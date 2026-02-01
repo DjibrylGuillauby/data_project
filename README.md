@@ -20,17 +20,26 @@ Le programme doit être exécuté avec la commande : ``python main.py``
 
 ## Data
 
-Nous avons décidé de prendre un jeux de données sur le covid 19 : ``https://disease.sh/``.
-Les données ont pour source Worldometers et sont mise à jour toutes les 10 minutes.
+Nous avons décidé de prendre un jeu de données sur le covid 19 : ``https://disease.sh/``.
+Les données ont pour source Worldometers et sont mises à jour toutes les 10 minutes.
 Nous avons plus précisément utilisé :
 
 _Nous trions les données afin d'avoir le nombre de cas, de morts, de soignés et de cas actifs selon la période et la zone géographique_
 
 - ``https://disease.sh/v3/covid-19/countries`` pour chaque pays à l'état actuel
-- ``https://disease.sh/v3/covid-19/historical?lastdays=all``pour chaque pays puis chaque continent selon l'année choisi (2020, 2021 ou 2022)
+- ``https://disease.sh/v3/covid-19/historical?lastdays=all``pour chaque pays puis chaque continent selon l'année choisie (2020, 2021 ou 2022)
 - ``https://disease.sh/v3/covid-19/historical?lastdays=all`` pour chaque continent à l'état actuel
 
 ## Developer Guide
+
+Notre projet est développé en programmation impérative.\
+Le programme est structuré autour de fonctions d'utilité différentes (chargement des données, traitement, visualisation), toutes appelées par la racine du projet, main.py.
+
+Le fichier principal main.py est le point d’entrée de l’application Dash.\
+Il définit les cartes et graphiques, gère les callbacks Dash et gère la logique d’affichage des graphiques. Il appelle uniquement des fonctions utilitaires.
+
+Pour rajouter des graphiques, il suffit de copier coller les div html du main puis faire de même pour les callback tout en adaptant à la situation\ 
+Cependant nous ne pouvons pas rapidement créer de nouvelles pages.
 
 ## Rapport d’analyse
 
@@ -83,3 +92,5 @@ Chaque année présente des caractéristiques propres, illustrant l’évolution
 Ce dashboard constitue un outil d’aide à l’analyse permettant d’explorer l’évolution du COVID-19 à différentes échelles temporelles et géographiques, tout en facilitant l’identification des tendances clés de la pandémie.
 
 ## Copyright
+
+Nous déclarons sur l'honneur que le code fourni a été produit par nous-mêmes.
