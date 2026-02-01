@@ -1,6 +1,7 @@
 import pandas as pd
 import requests
 import os
+from src.utils.clean_data import get_country_continent_csv
 
 def fetch_historical_countries(year):
     """Récupère les données historiques par pays pour une année donnée"""
@@ -110,6 +111,8 @@ def fetch_historical_continents(year):
         return pd.DataFrame()
 
     mapping_path = os.path.join("data", "cleaned", "country_continent.csv")
+    if not os.path.exists(mapping_path):
+        get_country_continent_csv()
     df_mapping = pd.read_csv(mapping_path)
 
     df_countries = df_countries.merge(

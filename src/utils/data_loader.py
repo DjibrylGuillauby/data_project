@@ -26,13 +26,13 @@ def load_current_continents_data() -> pd.DataFrame:
     Charge les données 'current' depuis data/cleaned si le cache est valide.
     Sinon, rafraîchit en appelant get_data() puis clean_data().
     """
+
     if is_cache_valid(CLEAN_PATH_CONTINENTS, CACHE_TTL_SECONDS):
         return pd.read_csv(CLEAN_PATH_CONTINENTS)
 
     # Rafraîchissement
     get_data_continents()
     clean_data_continents()
-    get_country_continent_csv()
     return pd.read_csv(CLEAN_PATH_CONTINENTS)
 
 def load_historical_year_data(year: int) -> pd.DataFrame:
